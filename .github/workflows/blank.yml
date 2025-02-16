@@ -1,0 +1,44 @@
+name: Update Workflow
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub"
+          git config user.email "gitacti@outlook.com"
+
+      - name: Apply changes
+        run: |
+          git pull origin main --rebase
+          
+          if [ -f workflow.txt ]; then
+            current_text=$(cat workflow.txt)
+          else
+            current_text="Update"
+          fi
+
+          if [ "$current_text" == "Update" ]; then
+            echo "Updated" > workflow.txt
+          else
+            echo "Update" > workflow.txt
+          fi
+
+          git add workflow.txt
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Routine update"
+            git push origin main
+          fi
